@@ -6,7 +6,7 @@ const Loader = ({ title }: { title: string }) => {
   return (
     <div className="overlay">
       <div className="lds-default">
-        <l-cardio size="50" stroke="4" speed="2" color="purple"></l-cardio>
+        <l-cardio size="50" stroke="4" speed="2" color="blue"></l-cardio>
         <p className="text-sm">{title}</p>
       </div>
     </div>

@@ -9,41 +9,44 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Loader from "../app-components/Loader";
 import Modal from "../app-components/Modal";
 import { TodoList } from "@/interface-and-types";
-import { PlusCircleIcon, TrashIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import {
+  PlusCircleIcon,
+  TrashIcon,
+  PencilSquareIcon,
+} from "@heroicons/react/24/outline";
+import { Link } from "react-router-dom";
 
 const TodoApp: React.FC = () => {
+  // State definition
   const [status, setStatus] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [edit, setEdit] = useState<boolean>(false);
   const [completed, setCompleted] = useState<boolean>(false);
   const [id, setId] = useState<string>("");
 
+  // Hooks from React Query
   const todos = useGetTodos(status);
   const addNewTodo = useCreateTodo();
   const editTodo = useEditTodo();
   const { mutate: deleteTodo, isPending } = useDeleteTodo();
 
+  // form validation schema
   const schema = z.object({
     text: z
       .string()
       .refine((val) => val.trim() !== "", { message: "Required" }),
   });
   type SchemaType = z.infer<typeof schema>;
+
+  // React hook form setup
   const {
     register,
     handleSubmit,
     setValue,
     formState: { errors },
   } = useForm<SchemaType>({ resolver: zodResolver(schema) });
-  const toggleTaskCompletion = (todo: TodoList) => {
-    const x = {
-      _id: todo._id,
-      text: todo.text,
-      completed: !todo.completed,
-    };
-    editTodo.mutate(x);
-  };
 
+  // Create Todo Function
   const onSubmit: SubmitHandler<SchemaType> = async (data) => {
     setIsLoading(true);
     const x = {
@@ -57,6 +60,7 @@ const TodoApp: React.FC = () => {
     setCompleted(data.completed);
     setId(data._id);
   };
+  // Edit Todo Function
   const onEdit: SubmitHandler<SchemaType> = async (data) => {
     setEdit(false);
     setValue("text", "");
@@ -68,10 +72,19 @@ const TodoApp: React.FC = () => {
     };
     editTodo.mutate(x);
   };
-
+  // Delete Todo Function
   const deleteTask = (id: string) => {
     setIsLoading(true);
     deleteTodo(id);
+  };
+  // Todo status completion
+  const toggleTaskCompletion = (todo: TodoList) => {
+    const x = {
+      _id: todo._id,
+      text: todo.text,
+      completed: !todo.completed,
+    };
+    editTodo.mutate(x);
   };
 
   useEffect(() => {
@@ -99,19 +112,20 @@ const TodoApp: React.FC = () => {
   useEffect(() => {
     todos.refetch();
   }, [status, todos]);
-
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-auto">
       <main className="w-full max-w-lg p-6 bg-white rounded-lg shadow-xl dark:bg-gray-700">
+        {/* Todo Header */}
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
-            Todo List
-          </h2>
-          <label
-            className="w-6 h-6 bg-no-repeat bg-center cursor-pointer"
-            style={{ backgroundImage: "url('/images/icon-moon.svg')" }}
-          ></label>
+                <h1 className="bg-[radial-gradient(138.06%_1036.51%_at_95.25%_-2.54%,_#7ED4FD_14.06%,#709DF7_51.02%,#4D78EF_79.09%)] bg-clip-text text-base leading-[1.2] tracking-tighter text-transparent sm:text-center font-semibold sm:text-lg sm:leading-[1.75rem] lg:text-left">
+                  Sabre Todo App
+                </h1>
+                <div className="flex gap-4 text-black">
+                  <Link to="/" className="hover:text-blue-500">Tasks</Link>
+                  <Link to="/about"  className="hover:text-blue-500">About</Link>
+              </div>
         </div>
+        {/* Create todo form*/}
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex items-center bg-gray-100 p-3 rounded-lg mb-4"
@@ -127,18 +141,14 @@ const TodoApp: React.FC = () => {
               {errors?.text?.message}
             </span>
           )}
-          <button
-            type="submit"
-            className=""
-          >
-            <PlusCircleIcon className="w-10 h-10 text-blue-500 hover:text-blue-700"/>
+          <button type="submit" className="">
+            <PlusCircleIcon className="w-10 h-10 text-blue-500 hover:text-blue-700" />
           </button>
         </form>
+        {/* Todo List */}
         <div className="space-y-4 overflow-auto max-h-[50vh] custom-scrollbar">
           {todos.isLoading ? (
-            <div className="flex items-center justify-between bg-gray-200 p-4 rounded-lg shadow-sm dark:bg-gray-600">
-              <div className="flex items-center">Loading...</div>
-            </div>
+            <div className="text-center">Loading...</div>
           ) : todos?.data?.response && todos?.data?.response?.length > 0 ? (
             todos.data.response.map((todo, index) => (
               <div
@@ -165,27 +175,24 @@ const TodoApp: React.FC = () => {
                     onClick={() => deleteTask(todo._id)}
                     className="text-red-500 hover:text-red-700"
                   >
-                    <TrashIcon className="w-5 h-5"/>
+                    <TrashIcon className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => handleEdit(todo)}
                     className="text-blue-500 hover:text-blue-700"
                   >
-                    <PencilSquareIcon className="w-5 h-5"/>
+                    <PencilSquareIcon className="w-5 h-5" />
                   </button>
                 </div>
               </div>
             ))
           ) : (
-            <div className="text-center">
-             
-                You have not created a todo!
-              
-            </div>
+            <div className="text-center">You have not created a todo!</div>
           )}
         </div>
+        {/* Todo Filter */}
         <div className="flex justify-between items-center mt-6">
-          {todos.data?.response.filter((todo) => !todo.completed).length} tasks
+          {todos.data?.response.filter((todo) => !todo.completed).length + ' ' + `tasks`} 
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setStatus("")}
@@ -214,7 +221,9 @@ const TodoApp: React.FC = () => {
           </div>
         </div>
       </main>
+      {/* Loader */}
       {isLoading && <Loader title="Please Wait..." />}
+      {/* Edit Todo Modal */}
       <Modal
         isOpen={edit}
         onClose={() => setEdit(false)}
