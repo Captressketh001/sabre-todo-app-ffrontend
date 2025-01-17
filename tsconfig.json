@@ -17,13 +17,13 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": [],
+    "types": ["jest", "@testing-library/jest-dom", "node"],
     "paths": {
       "@/*": ["./src/*"],
     },
   },
   // "include": ["src"],
-  "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx", "global.d.ts"],
   "references": [
     // { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }

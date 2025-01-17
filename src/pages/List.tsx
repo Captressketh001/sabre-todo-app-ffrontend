@@ -179,6 +179,7 @@ const TodoApp: React.FC = () => {
                   </button>
                   <button
                     onClick={() => handleEdit(todo)}
+                    aria-label="Edit todo"
                     className="text-blue-500 hover:text-blue-700"
                   >
                     <PencilSquareIcon className="w-5 h-5" />
